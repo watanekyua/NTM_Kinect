@@ -25,12 +25,12 @@ public class LogicManager : MonoBehaviour
     }
 
     void ParseData(string data){
+        Debug.Log(data);
         var result = JsonUtility.FromJson<PosDataBase>(data);
+        Vector2 ps = new Vector2(result.data.x, result.data.y);
 
-        Debug.Log(result);
-        Debug.Log(result.data);
-        Debug.Log(result.data[0]);
-        //Debug.Log(result.data[0][0]);
+        Debug.Log(ps);
+        //SendSerial(ps);
     }
 
     public Vector2 testPos;
@@ -58,12 +58,13 @@ public class LogicManager : MonoBehaviour
     [System.Serializable]
     public class PosDataBase
     {
-        public List<List<string>> data;
+        public PosData data;
     }
 
     [System.Serializable]
     public class PosData
     {
-        public List<float> num;
+        public float x;
+        public float y;
     }
 }

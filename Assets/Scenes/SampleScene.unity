@@ -1048,7 +1048,7 @@ MonoBehaviour:
   INP_angleDelta: {fileID: 450840355}
   angleDelta: 60
   testPos: {x: 1, y: 0}
-  testData: '{"data": [[1, 1],[11, 22],[33, 44]]}'
+  testData: '{"data": {"x": 0.8518412884016682, "y": 0.7949302344801323}}'
 --- !u!1 &1838966731591676977
 GameObject:
   m_ObjectHideFlags: 0
