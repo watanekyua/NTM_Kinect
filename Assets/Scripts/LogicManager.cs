@@ -34,8 +34,12 @@ public class LogicManager : MonoBehaviour
     }
 
     public Vector2 testPos;
-    
     [EasyButtons.Button]
+    void TestPos(){
+        SendSerial(testPos);
+    }
+    
+    
     void SendSerial(Vector2 pos){
         //pos = testPos;
         float angle = Mathf.Atan2(pos.y, pos.x) * Mathf.Rad2Deg;
