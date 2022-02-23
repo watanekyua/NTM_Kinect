@@ -138,6 +138,9 @@ public class SignalClient : MonoBehaviour {
 
 	public void SocketSend(string sendStr)
 	{
+        if(tcpSocket == null)
+            return;
+
         if(!netStream.CanWrite)
             return;
 
@@ -146,7 +149,8 @@ public class SignalClient : MonoBehaviour {
             byte[] sendData = System.Text.Encoding.UTF8.GetBytes(toSend);
             netStream.Write(sendData, 0, sendData.Length);
 
-            Debug.Log ($"TCP >> Send: {sendStr}");
+            //Debug.Log ($"TCP >> Send: {sendStr}");
+            Debug.Log($"Tcp Send : {sendStr.Length}");
         }
         catch(System.Exception e){
             Debug.LogError(e.Message.ToString());
@@ -157,7 +161,7 @@ public class SignalClient : MonoBehaviour {
 	{
         if(tcpSocket == null)
             return;
-            
+
         if(!netStream.CanWrite)
             return;
 

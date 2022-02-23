@@ -23,6 +23,7 @@ public class AtKinectController : MonoBehaviour
 
     public SignalClient kinectClient;
     public float sendDelay = 1f;
+    public int everyCount = 1000;
 
     string path;
     void Start()
@@ -36,7 +37,7 @@ public class AtKinectController : MonoBehaviour
         StartCoroutine(LoopSend());
 
         path = Application.dataPath + "/../" + fileName;
-        //writer = new StreamWriter(path, true);
+        writer = new StreamWriter(path, true);
         
         //bw = new BinaryWriter(fs);
 
@@ -45,10 +46,42 @@ public class AtKinectController : MonoBehaviour
 
     IEnumerator LoopSend(){
         while(true){
-            kinectClient.SocketSend(CatchData());
+            kinectClient.SocketSend(CatchStringData());
 
             yield return new WaitForSeconds(sendDelay);
         }
+    }
+
+    string CatchStringData(){
+        if (currentArray == null)
+            return null;
+
+        //Debug.Log("Start Write.");
+
+        string data = "";
+
+        int index = 0;
+        foreach (Short3 value in currentArray)
+        {
+            index = (index + 1) % everyCount;
+            if(index % everyCount != 0)
+                continue;
+
+            data += $"{value.X},{value.Y},{value.Z},";
+        }
+        //byte[] allByte = menStream.ToArray();
+        //menStream.Read(allByte, 0, allByte.Length);
+
+        // fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
+        // fs.Write(data);
+        // fs.Flush();
+        // fs.Close();
+        string result = data.Remove(data.Length - 1);
+        //Debug.Log(result);
+        //Debug.Log("Write Finished");
+
+        //return "123";
+        return data;
     }
 
     void InitKinect()
@@ -111,7 +144,7 @@ public class AtKinectController : MonoBehaviour
 
         Debug.Log("Start Write.");
 
-        MemoryStream menStream = new MemoryStream(byteCapacity);
+        MemoryStream menStream = new MemoryStream();
 
         foreach (Short3 value in currentArray)
         {
@@ -122,11 +155,13 @@ public class AtKinectController : MonoBehaviour
             num = BitConverter.GetBytes(value.Z);
             menStream.Write(num, 0, num.Length);
         }
-        byte[] allByte = new byte[byteCapacity];
-        menStream.Read(allByte, 0, allByte.Length);
+        byte[] allByte = menStream.ToArray();
+       // menStream.Read(allByte, 0, allByte.Length);
 
         fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
         fs.Write(allByte, 0 , allByte.Length);
+        fs.Flush();
+        fs.Close();
 
         Debug.Log("Write Finished");
 

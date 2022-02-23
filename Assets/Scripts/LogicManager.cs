@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LogicManager : MonoBehaviour
+public class LogicManager : HimeLib.SingletonMono<LogicManager>
 {
     public ArduinoInteractive arduino;
     public InputField INP_angleDelta;
@@ -28,8 +28,20 @@ public class LogicManager : MonoBehaviour
         });
 
         INP_angleDelta.text = SystemConfig.Instance.GetData<float>("angleDelta", 0).ToString();
-        
+        StartCoroutine(secondupdate());
     }
+
+
+    IEnumerator secondupdate(){
+        while(true){
+            if(ReadyToSend)
+                SendSerial(new Vector2(currentPos.x, currentPos.y));
+
+            yield return new WaitForSeconds(.2f);
+        }
+    }
+
+    PosData currentPos = new PosData();
 
     void ParseData(string data){
         string[] result = data.Split("{\"data\"");
@@ -53,9 +65,10 @@ public class LogicManager : MonoBehaviour
 
             if(distance < 9999){
                 Debug.Log($">> {t.x}, {t.y}");
-
-                if(ReadyToSend)
-                    SendSerial(new Vector2(t.x, t.y));
+                
+                currentPos = t;
+                // if(ReadyToSend)
+                //     SendSerial(new Vector2(t.x, t.y));
             }
             
             //Debug.Log(obj.data.Count);
@@ -68,9 +81,11 @@ public class LogicManager : MonoBehaviour
     void TestPos(){
         SendSerial(testPos);
     }
+
+
     
     
-    void SendSerial(Vector2 pos){
+    public void SendSerial(Vector2 pos){
         //pos = testPos;
         float angle = Mathf.Atan2(pos.y, pos.x) * Mathf.Rad2Deg;
         angle = angle + angleDelta;
