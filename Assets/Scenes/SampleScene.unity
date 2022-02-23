@@ -1115,7 +1115,7 @@ MonoBehaviour:
   OnSignalReceived:
     m_PersistentCalls:
       m_Calls: []
-  runInStart: 0
+  runInStart: 1
   signalForRecieved: 
   signalForSend: 
 --- !u!1 &1637460926
@@ -1216,7 +1216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4076e3343b0626458286aa2d44e5415, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fileName: pc.bin
+  fileName: pc.txt
   kinectClient: {fileID: 553239925}
   sendDelay: 1
   byteCapacity: 999999

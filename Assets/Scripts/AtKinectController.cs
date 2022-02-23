@@ -35,12 +35,12 @@ public class AtKinectController : MonoBehaviour
 
         StartCoroutine(LoopSend());
 
-        return;
-
         path = Application.dataPath + "/../" + fileName;
         //writer = new StreamWriter(path, true);
-        fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
-        bw = new BinaryWriter(fs);
+        
+        //bw = new BinaryWriter(fs);
+
+        return;
     }
 
     IEnumerator LoopSend(){
@@ -103,12 +103,6 @@ public class AtKinectController : MonoBehaviour
         writer.Flush();
     }
 
-    private void OnApplicationQuit() {
-        if(writer != null) writer.Close();
-        if(bw != null) bw.Close();
-        if(fs != null) fs.Close();
-    }
-
     public int byteCapacity = 999999;
     byte[] CatchData()
     {
@@ -130,6 +124,9 @@ public class AtKinectController : MonoBehaviour
         }
         byte[] allByte = new byte[byteCapacity];
         menStream.Read(allByte, 0, allByte.Length);
+
+        fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
+        fs.Write(allByte, 0 , allByte.Length);
 
         Debug.Log("Write Finished");
 
@@ -178,5 +175,11 @@ public class AtKinectController : MonoBehaviour
     {
         if(kinect != null)
             kinect.StopCameras();
+    }
+
+    private void OnApplicationQuit() {
+        if(writer != null) writer.Close();
+        if(bw != null) bw.Close();
+        if(fs != null) fs.Close();
     }
 }
