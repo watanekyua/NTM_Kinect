@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using UnityEngine.Events;
 using System.Threading.Tasks;
 
-public class SignalClient : HimeLib.SingletonMono<SignalClient> {
+public class SignalClient : MonoBehaviour {
     public string serverIP = "127.0.0.1";
     public int serverPort = 25568;
     public int recvBufferSize = 1024;
@@ -147,6 +147,24 @@ public class SignalClient : HimeLib.SingletonMono<SignalClient> {
             netStream.Write(sendData, 0, sendData.Length);
 
             Debug.Log ($"TCP >> Send: {sendStr}");
+        }
+        catch(System.Exception e){
+            Debug.LogError(e.Message.ToString());
+        }
+	}
+
+    public void SocketSend(byte[] sendByte)
+	{
+        if(tcpSocket == null)
+            return;
+            
+        if(!netStream.CanWrite)
+            return;
+
+        try {
+            netStream.Write(sendByte, 0, sendByte.Length);
+
+            Debug.Log ($"TCP >> Send: byte");
         }
         catch(System.Exception e){
             Debug.LogError(e.Message.ToString());

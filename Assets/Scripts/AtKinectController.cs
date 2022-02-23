@@ -6,7 +6,7 @@ using Microsoft.Azure.Kinect.Sensor;
 using System.Threading.Tasks;
 
 using System.IO;
-
+using System;
 
 public class AtKinectController : MonoBehaviour
 {
@@ -21,6 +21,9 @@ public class AtKinectController : MonoBehaviour
 
     public string fileName = "pc.bin";
 
+    public SignalClient kinectClient;
+    public float sendDelay = 1f;
+
     string path;
     void Start()
     {
@@ -28,7 +31,9 @@ public class AtKinectController : MonoBehaviour
         InitMesh();
 
         Task t = KinectLoop();
-        t.Start();
+        //t.Start();
+
+        StartCoroutine(LoopSend());
 
         return;
 
@@ -36,6 +41,14 @@ public class AtKinectController : MonoBehaviour
         //writer = new StreamWriter(path, true);
         fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
         bw = new BinaryWriter(fs);
+    }
+
+    IEnumerator LoopSend(){
+        while(true){
+            kinectClient.SocketSend(CatchData());
+
+            yield return new WaitForSeconds(sendDelay);
+        }
     }
 
     void InitKinect()
@@ -84,28 +97,6 @@ public class AtKinectController : MonoBehaviour
     FileStream fs;
     BinaryWriter bw;
 
-    [ContextMenu("Catch Data")]
-    void CatchData()
-    {
-        if (currentArray == null)
-            return;
-
-        // string result = "";
-
-        // for (int i = 0; i < currentArray.Length; i++)
-        // {
-        //     result = $"{currentArray[i].X},{currentArray[i].Y},{currentArray[i].Z}|";
-        //     WriteString(result);
-        // }
-
-        // result += "|";
-
-        Debug.Log("Start Write.");
-        WriteShorts(currentArray);
-        Debug.Log("Write Finished");
-        //Debug.Log(result);
-    }
-
     public void WriteString(string str)
     {
         writer.Write(str);
@@ -118,15 +109,32 @@ public class AtKinectController : MonoBehaviour
         if(fs != null) fs.Close();
     }
 
-    void WriteShorts(Short3[] values)
+    public int byteCapacity = 999999;
+    byte[] CatchData()
     {
-        foreach (Short3 value in values)
+        if (currentArray == null)
+            return null;
+
+        Debug.Log("Start Write.");
+
+        MemoryStream menStream = new MemoryStream(byteCapacity);
+
+        foreach (Short3 value in currentArray)
         {
-            bw.Write(value.X);
-            bw.Write(value.Y);
-            bw.Write(value.Z);
+            byte[] num = BitConverter.GetBytes(value.X);
+            menStream.Write(num, 0, num.Length);
+            num = BitConverter.GetBytes(value.Y);
+            menStream.Write(num, 0, num.Length);
+            num = BitConverter.GetBytes(value.Z);
+            menStream.Write(num, 0, num.Length);
         }
-        bw.Flush();
+        byte[] allByte = new byte[byteCapacity];
+        menStream.Read(allByte, 0, allByte.Length);
+
+        Debug.Log("Write Finished");
+
+        return allByte;
+        
     }
 
     async Task KinectLoop()

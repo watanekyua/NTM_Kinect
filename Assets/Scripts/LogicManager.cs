@@ -8,10 +8,17 @@ public class LogicManager : MonoBehaviour
     public ArduinoInteractive arduino;
     public InputField INP_angleDelta;
 
+    public SignalClient PosServer;
+
     public float angleDelta = 60f;
+
+    [Header("Arduino")]
+    public bool ReadyToSend = false;
     void Start()
     {
-        SignalClient.instance.OnSignalReceived.AddListener(ParseData);
+        PosServer.OnSignalReceived.AddListener(ParseData);
+
+
         INP_angleDelta.onValueChanged.AddListener(x => {
             float result = 0;
             if(float.TryParse(INP_angleDelta.text, out result)){
@@ -25,12 +32,35 @@ public class LogicManager : MonoBehaviour
     }
 
     void ParseData(string data){
-        Debug.Log(data);
-        var result = JsonUtility.FromJson<PosDataBase>(data);
-        Vector2 ps = new Vector2(result.data.x, result.data.y);
+        string[] result = data.Split("{\"data\"");
+        string f_data;
+        if(result.Length > 1){
+            f_data = "{\"data\""  + result[1];
 
-        Debug.Log(ps);
-        //SendSerial(ps);
+            //Debug.Log(f_data);
+            var obj = JsonUtility.FromJson<PosDataBase>(f_data);
+
+            float distance = 9999;
+            PosData t = new PosData();
+            foreach (var item in obj.data)
+            {
+                float dis = Mathf.Sqrt((item.x * item.x) + (item.y + item.y));
+                if(dis < distance){
+                    distance = dis;
+                    t = item;
+                }
+            }
+
+            if(distance < 9999){
+                Debug.Log($">> {t.x}, {t.y}");
+
+                if(ReadyToSend)
+                    SendSerial(new Vector2(t.x, t.y));
+            }
+            
+            //Debug.Log(obj.data.Count);
+        }
+        
     }
 
     public Vector2 testPos;
@@ -64,7 +94,7 @@ public class LogicManager : MonoBehaviour
     [System.Serializable]
     public class PosDataBase
     {
-        public PosData data;
+        public List<PosData> data;
     }
 
     [System.Serializable]
