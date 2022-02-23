@@ -43,13 +43,15 @@ public class LogicManager : MonoBehaviour
     void SendSerial(Vector2 pos){
         //pos = testPos;
         float angle = Mathf.Atan2(pos.y, pos.x) * Mathf.Rad2Deg;
-        angle = angle < 0 ? angle + 360f : angle;
         angle = angle + angleDelta;
+        angle = angle < 0 ? angle + 360f : angle;
+        
         byte convAngle = (byte)Mathf.FloorToInt((angle/360)*200);
         
-        Debug.Log($"{angle},{convAngle}");
         byte[] tosend = {0x00, 0x06, 0x02, convAngle, 0x0d, 0x0a};
         arduino.SendByte(tosend);
+
+        Debug.Log($"{0x00} {0x06} {0x02} {convAngle} {0x0d} {0x0a} / angle:{angle}");
     }
 
     public string testData;

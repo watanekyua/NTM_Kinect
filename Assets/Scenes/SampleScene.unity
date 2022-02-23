@@ -944,7 +944,8 @@ MonoBehaviour:
   runInStart: 1
   ArduinoPortState: 0
   baudRate: 921600
-  comName: COM3
+  comName: COM4
+  toTests: 0013003c0d0a
 --- !u!1 &1584432379
 GameObject:
   m_ObjectHideFlags: 0
@@ -997,7 +998,7 @@ MonoBehaviour:
   OnSignalReceived:
     m_PersistentCalls:
       m_Calls: []
-  runInStart: 1
+  runInStart: 0
   signalForRecieved: 
   signalForSend: 
 --- !u!1 &1637460926

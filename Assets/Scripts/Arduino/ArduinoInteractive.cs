@@ -126,6 +126,13 @@ public class ArduinoInteractive : MonoBehaviour
 		arduinoPort.Write(data, 0, data.Length);
 	}
 
+	[Header("Debug")]
+	public byte[] toTests;
+	[EasyButtons.Button]
+	void SendTest(){
+		SendByte(toTests);
+	}
+
     void RecieveThread(){
 		while (true) {
 			if(arduinoPort == null){

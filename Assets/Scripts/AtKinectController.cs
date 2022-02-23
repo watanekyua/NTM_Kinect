@@ -1,63 +1,174 @@
-// using System.Collections;
-// using System.Collections.Generic;
-// using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-// using Microsoft.Azure.Kinect.Sensor;
+using Microsoft.Azure.Kinect.Sensor;
+using System.Threading.Tasks;
 
-// public class AtKinectController : MonoBehaviour
-// {
-//     Device kinect;
+using System.IO;
 
-//     Texture2D kinectColorTexture;
 
-//     [SerializeField]
-//     UnityEngine.UI.RawImage rawColorImg;
+public class AtKinectController : MonoBehaviour
+{
+    Device kinect;
+    int num;
 
-//     void Start(){
-//         InitKinect();
-//     }
+    Mesh mesh;
+    Vector3[] vertices;
+    Color32[] colors;
+    int[] indices;
+    Transformation transformation;
 
-//     void InitKinect(){
-//         kinect = Device.Open(0);
+    public string fileName = "pc.bin";
 
-//         kinect.StartCameras(new DeviceConfiguration{
-//             ColorFormat = ImageFormat.ColorBGRA32,
-//             ColorResolution = ColorResolution.R720p,
-//             DepthMode = DepthMode.NFOV_2x2Binned,
-//             SynchronizedImagesOnly = true,
-//             CameraFPS = FPS.FPS30
-//         });
+    string path;
+    void Start()
+    {
+        InitKinect();
+        InitMesh();
 
-//         int width = kinect.GetCalibration().ColorCameraCalibration.ResolutionWidth;
-//         int height = kinect.GetCalibration().ColorCameraCalibration.ResolutionHeight;
+        Task t = KinectLoop();
+        t.Start();
 
-//         kinectColorTexture = new Texture2D(width, height);
-//     }
+        return;
 
-//     void Update(){
-//         Capture capture = kinect.GetCapture();
+        path = Application.dataPath + "/../" + fileName;
+        //writer = new StreamWriter(path, true);
+        fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
+        bw = new BinaryWriter(fs);
+    }
 
-//         Image colorImage = capture.Color;
+    void InitKinect()
+    {
+        kinect = Device.Open(0);
 
-//         Color32[] pixels = colorImage.GetPixels<Color32>().ToArray();
+        kinect.StartCameras(new DeviceConfiguration
+        {
+            ColorFormat = ImageFormat.ColorBGRA32,
+            ColorResolution = ColorResolution.R720p,
+            DepthMode = DepthMode.NFOV_2x2Binned,
+            SynchronizedImagesOnly = true,
+            CameraFPS = FPS.FPS30
+        });
 
-//         for (int i = 0; i < pixels.Length; i++)
-//         {
-//             var d = pixels[i].b;
-//             var k = pixels[i].r;
-//             pixels[i].r = d;
-//             pixels[i].b = k;
-//         }
+        transformation = kinect.GetCalibration().CreateTransformation();
+    }
 
-//         kinectColorTexture.SetPixels32(pixels);
-//         kinectColorTexture.Apply();
+    void InitMesh()
+    {
+        int width = kinect.GetCalibration().DepthCameraCalibration.ResolutionWidth;
+        int height = kinect.GetCalibration().DepthCameraCalibration.ResolutionHeight;
+        num = width * height;
 
-//         rawColorImg.texture = kinectColorTexture;
+        mesh = new Mesh();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
-//         capture.Dispose();
-//     }
+        vertices = new Vector3[num];
+        colors = new Color32[num];
+        indices = new int[num];
 
-//     private void OnDestroy() {
-//         kinect.StopCameras();
-//     }
-// }
+        for (int i = 0; i < num; i++)
+        {
+            indices[i] = i;
+        }
+
+        mesh.vertices = vertices;
+        mesh.colors32 = colors;
+        mesh.SetIndices(indices, MeshTopology.Points, 0);
+
+        gameObject.GetComponent<MeshFilter>().mesh = mesh;
+    }
+
+    Short3[] currentArray;
+    StreamWriter writer;
+    FileStream fs;
+    BinaryWriter bw;
+
+    [ContextMenu("Catch Data")]
+    void CatchData()
+    {
+        if (currentArray == null)
+            return;
+
+        // string result = "";
+
+        // for (int i = 0; i < currentArray.Length; i++)
+        // {
+        //     result = $"{currentArray[i].X},{currentArray[i].Y},{currentArray[i].Z}|";
+        //     WriteString(result);
+        // }
+
+        // result += "|";
+
+        Debug.Log("Start Write.");
+        WriteShorts(currentArray);
+        Debug.Log("Write Finished");
+        //Debug.Log(result);
+    }
+
+    public void WriteString(string str)
+    {
+        writer.Write(str);
+        writer.Flush();
+    }
+
+    private void OnApplicationQuit() {
+        if(writer != null) writer.Close();
+        if(bw != null) bw.Close();
+        if(fs != null) fs.Close();
+    }
+
+    void WriteShorts(Short3[] values)
+    {
+        foreach (Short3 value in values)
+        {
+            bw.Write(value.X);
+            bw.Write(value.Y);
+            bw.Write(value.Z);
+        }
+        bw.Flush();
+    }
+
+    async Task KinectLoop()
+    {
+        while (true)
+        {
+            using (Capture capture = await Task.Run(() => kinect.GetCapture()).ConfigureAwait(true))
+            {
+                Image colorImage = transformation.ColorImageToDepthCamera(capture);
+
+                BGRA[] colorArray = colorImage.GetPixels<BGRA>().ToArray();
+
+                Image xyzImage = transformation.DepthImageToPointCloud(capture.Depth);
+
+                Short3[] xyzArray = xyzImage.GetPixels<Short3>().ToArray();
+
+                currentArray = xyzArray;
+
+                float amp = 0.001f;
+                for (int i = 0; i < num; i++)
+                {
+                    vertices[i].x = xyzArray[i].X * amp;
+                    vertices[i].y = xyzArray[i].Y * amp;
+                    vertices[i].z = xyzArray[i].Z * amp;
+
+                    colors[i].b = colorArray[i].B;
+                    colors[i].g = colorArray[i].G;
+                    colors[i].r = colorArray[i].R;
+                    colors[i].a = 255;
+                }
+
+                mesh.vertices = vertices;
+                mesh.colors32 = colors;
+                mesh.RecalculateBounds();
+
+            }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if(kinect != null)
+            kinect.StopCameras();
+    }
+}
