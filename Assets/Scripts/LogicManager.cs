@@ -7,17 +7,12 @@ public class LogicManager : HimeLib.SingletonMono<LogicManager>
 {
     public ArduinoInteractive arduino;
     public InputField INP_angleDelta;
-
-    public SignalClient PosServer;
-
     public float angleDelta = 60f;
 
     [Header("Arduino")]
     public bool ReadyToSend = false;
     void Start()
     {
-        PosServer.OnSignalReceived.AddListener(ParseData);
-
 
         INP_angleDelta.onValueChanged.AddListener(x => {
             float result = 0;
@@ -28,65 +23,53 @@ public class LogicManager : HimeLib.SingletonMono<LogicManager>
         });
 
         INP_angleDelta.text = SystemConfig.Instance.GetData<float>("angleDelta", 0).ToString();
-        StartCoroutine(secondupdate());
     }
 
+    // void ParseData(string data){
+    //     string[] result = data.Split("{\"data\"");
+    //     string f_data;
+    //     if(result.Length > 1){
+    //         f_data = "{\"data\""  + result[1];
 
-    IEnumerator secondupdate(){
-        while(true){
-            if(ReadyToSend)
-                SendSerial(new Vector2(currentPos.x, currentPos.y));
+    //         //Debug.Log(f_data);
+    //         var obj = JsonUtility.FromJson<PosDataBase>(f_data);
 
-            yield return new WaitForSeconds(.2f);
-        }
-    }
+    //         float distance = 9999;
+    //         PosData t = new PosData();
+    //         foreach (var item in obj.data)
+    //         {
+    //             float dis = Mathf.Sqrt((item.x * item.x) + (item.y + item.y));
+    //             if(dis < distance){
+    //                 distance = dis;
+    //                 t = item;
+    //             }
+    //         }
 
-    PosData currentPos = new PosData();
-
-    void ParseData(string data){
-        string[] result = data.Split("{\"data\"");
-        string f_data;
-        if(result.Length > 1){
-            f_data = "{\"data\""  + result[1];
-
-            //Debug.Log(f_data);
-            var obj = JsonUtility.FromJson<PosDataBase>(f_data);
-
-            float distance = 9999;
-            PosData t = new PosData();
-            foreach (var item in obj.data)
-            {
-                float dis = Mathf.Sqrt((item.x * item.x) + (item.y + item.y));
-                if(dis < distance){
-                    distance = dis;
-                    t = item;
-                }
-            }
-
-            if(distance < 9999){
-                Debug.Log($">> {t.x}, {t.y}");
+    //         if(distance < 9999){
+    //             Debug.Log($">> {t.x}, {t.y}");
                 
-                currentPos = t;
-                // if(ReadyToSend)
-                //     SendSerial(new Vector2(t.x, t.y));
-            }
+    //             currentPos = t;
+    //             // if(ReadyToSend)
+    //             //     SendSerial(new Vector2(t.x, t.y));
+    //         }
             
-            //Debug.Log(obj.data.Count);
-        }
+    //         //Debug.Log(obj.data.Count);
+    //     }
         
-    }
+    // }
 
     public Vector2 testPos;
     [EasyButtons.Button]
-    void TestPos(){
+    void SendPosToArduino(){
         SendSerial(testPos);
     }
 
-
-    
-    
     public void SendSerial(Vector2 pos){
         //pos = testPos;
+        if(!ReadyToSend){
+            Debug.Log($"Emu arduino send : {pos}");
+            return;
+        }
         float angle = Mathf.Atan2(pos.y, pos.x) * Mathf.Rad2Deg;
         angle = angle + angleDelta;
         angle = angle < 0 ? angle + 360f : angle;
@@ -97,25 +80,5 @@ public class LogicManager : HimeLib.SingletonMono<LogicManager>
         arduino.SendByte(tosend);
 
         Debug.Log($"{0x00} {0x06} {0x02} {convAngle} {0x0d} {0x0a} / angle:{angle}");
-    }
-
-    public string testData;
-    [ContextMenu("test")]
-    void TestData(){
-        ParseData(testData);
-    }
-
-
-    [System.Serializable]
-    public class PosDataBase
-    {
-        public List<PosData> data;
-    }
-
-    [System.Serializable]
-    public class PosData
-    {
-        public float x;
-        public float y;
     }
 }

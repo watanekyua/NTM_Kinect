@@ -558,7 +558,7 @@ MonoBehaviour:
   OnSignalReceived:
     m_PersistentCalls:
       m_Calls: []
-  runInStart: 1
+  runInStart: 0
   signalForRecieved: 
   signalForSend: 
 --- !u!1 &692010923
@@ -1166,6 +1166,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1242156660}
   m_CullTransparentMesh: 1
+--- !u!1 &1305357878
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1305357879}
+  - component: {fileID: 1305357880}
+  m_Layer: 0
+  m_Name: PosReceiver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1305357879
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1305357878}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1584432380}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1305357880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1305357878}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 312150ed77efd8a4abb279cdb5c07ac5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  client: {fileID: 1584432381}
 --- !u!1 &1391264540
 GameObject:
   m_ObjectHideFlags: 0
@@ -1182,7 +1227,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1391264541
 Transform:
   m_ObjectHideFlags: 0
@@ -1211,7 +1256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tip: "Arduino \u7AEF\u9001\u8A0A\u606F\u5FC5\u9808\u4F7F\u7528 Serial.println(\"string\");"
-  runInStart: 1
+  runInStart: 0
   ArduinoPortState: 0
   baudRate: 921600
   comName: COM4
@@ -1324,7 +1369,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1584432380
 Transform:
   m_ObjectHideFlags: 0
@@ -1336,7 +1381,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1305357879}
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1352,10 +1398,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2d4b4a073adbd74eafe09efa62656b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverIP: 192.168.50.77
-  serverPort: 22001
-  recvBufferSize: 2048
-  EndToken: 
+  serverIP: 192.168.50.252
+  serverPort: 25565
+  recvBufferSize: 1024
+  EndToken: '[/TCP]'
   tip: "\u6240\u6709\u7684\u8A0A\u606F\u63A5\u7DE8\u78BC\u70BAUTF-8"
   OnSignalReceived:
     m_PersistentCalls:
@@ -1409,12 +1455,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   arduino: {fileID: 1391264542}
   INP_angleDelta: {fileID: 450840355}
-  PosServer: {fileID: 1584432381}
   angleDelta: 60
   ReadyToSend: 0
   testPos: {x: 1, y: 0}
-  testData: '{"data": [{"x": -0.08509563577586207, "y": 0.06471796283934639}, {"x":
-    0.14043475211934842, "y": 0.1659842707410621}]}'
 --- !u!1 &1749708711
 GameObject:
   m_ObjectHideFlags: 0
