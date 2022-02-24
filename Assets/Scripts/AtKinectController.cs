@@ -24,6 +24,8 @@ public class AtKinectController : MonoBehaviour
     public SignalClient kinectClient;
     public float sendDelay = 1f;
     public int everyCount = 1000;
+    public short depthFilterMin = 5000;
+    public short depthFilterMax = 9000;
 
     string path;
     void Start()
@@ -61,13 +63,26 @@ public class AtKinectController : MonoBehaviour
         string data = "";
 
         int index = 0;
+        int count = 0;
+        bool isFirst = true;
         foreach (Short3 value in currentArray)
         {
-            index = (index + 1) % everyCount;
+            index = (index + UnityEngine.Random.Range(1,2)) % everyCount;
             if(index % everyCount != 0)
                 continue;
 
-            data += $"{value.X},{value.Y},{value.Z},";
+            if(value.Z < depthFilterMin || value.Z > depthFilterMax){
+                continue;
+            }
+
+            if(isFirst){
+                data += $"{value.X},{value.Y},{value.Z}";
+                isFirst = false;
+            }
+            else
+                data += $"|{value.X},{value.Y},{value.Z}";
+
+            count++;
         }
         //byte[] allByte = menStream.ToArray();
         //menStream.Read(allByte, 0, allByte.Length);
@@ -76,11 +91,12 @@ public class AtKinectController : MonoBehaviour
         // fs.Write(data);
         // fs.Flush();
         // fs.Close();
-        string result = data.Remove(data.Length - 1);
+        //string result = data.Remove(data.Length - 1);
         //Debug.Log(result);
         //Debug.Log("Write Finished");
 
         //return "123";
+        Debug.Log($"Send count : {count}");
         return data;
     }
 

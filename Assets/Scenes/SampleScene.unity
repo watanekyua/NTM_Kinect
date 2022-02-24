@@ -558,7 +558,7 @@ MonoBehaviour:
   OnSignalReceived:
     m_PersistentCalls:
       m_Calls: []
-  runInStart: 0
+  runInStart: 1
   signalForRecieved: 
   signalForSend: 
 --- !u!1 &692010923
@@ -1211,6 +1211,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   client: {fileID: 1584432381}
+  isReadyToSend: 0
 --- !u!1 &1391264540
 GameObject:
   m_ObjectHideFlags: 0
@@ -1506,8 +1507,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fileName: pc.txt
   kinectClient: {fileID: 553239925}
-  sendDelay: 1
-  everyCount: 50
+  sendDelay: 0.33
+  everyCount: 10
+  depthFilterMin: 1000
+  depthFilterMax: 5000
   byteCapacity: 999999
 --- !u!23 &1749708714
 MeshRenderer:
