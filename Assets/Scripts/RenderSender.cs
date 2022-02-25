@@ -28,18 +28,19 @@ public class RenderSender : MonoBehaviour
         if(buffTex == null)
             buffTex = new Texture2D(source.width, source.height, TextureFormat.RGB24, false);
 
-        source.enableRandomWrite = true;
+        //source.enableRandomWrite = true;
         RenderTexture.active = source;
         buffTex.ReadPixels(new Rect(0, 0, source.width, source.height), 0, 0);
         RenderTexture.active = null;
 
-        byte[] bytes = buffTex.EncodeToJPG(100);
+        //byte[] bytes = buffTex.EncodeToJPG(100);
+        byte[] bytes = buffTex.EncodeToPNG();
 
         client.SocketSend(bytes);
 
         Debug.Log($"total byte {bytes.Length} send. (" + (float)bytes.Length / 1024f + "KB)");
         DeviceLogger.instance.SetText_ToSendImageByte(($"total byte {bytes.Length} send. (" + (float)bytes.Length / 1024f + "KB)"));
-        //WriteFile(bytes);
+        WriteFile(bytes);
     }
 
     void Update(){
@@ -48,8 +49,8 @@ public class RenderSender : MonoBehaviour
         }
     }
 
-    // void WriteFile(byte[] data){
-    //     var path = Application.dataPath + "/../output.txt";
-    //     File.WriteAllBytes(path, data);
-    // }
+    void WriteFile(byte[] data){
+        var path = Application.dataPath + "/../output.txt";
+        File.WriteAllBytes(path, data);
+    }
 }
