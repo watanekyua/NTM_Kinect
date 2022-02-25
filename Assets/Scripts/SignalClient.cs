@@ -7,9 +7,10 @@ using System.Threading;
 using System.Net.Sockets;
 using UnityEngine.Events;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class SignalClient : MonoBehaviour {
-    public TMPro.TextMeshProUGUI TXT_Logger; 
+    public TMPro.TextMeshProUGUI TXT_Logger;
     public string serverIP = "127.0.0.1";
     public int serverPort = 25568;
     public int recvBufferSize = 1024;
@@ -45,7 +46,12 @@ public class SignalClient : MonoBehaviour {
 
     void Update(){
         if(ActionQueue != null){
-            ActionQueue?.Invoke();
+            try {
+                ActionQueue?.Invoke();
+                }
+            catch( System.Exception e) {
+
+            }
             ActionQueue = null;
         }
     }
@@ -80,9 +86,9 @@ public class SignalClient : MonoBehaviour {
         connectThread = new Thread (ClientWork);
         connectThread.Start ();
 
-        Debug.Log ($"Connect to Server ({serverIP}) at port :" + serverPort);
+        Debug.Log ($"<color=cyan>Connect to Server ({serverIP}) at port :{serverPort}</color>");
         if(TXT_Logger)
-            TXT_Logger.text = $"Connect to Server ({serverIP}) at port :" + serverPort;
+            TXT_Logger.text = $"Connect to Server ({serverIP}) at port :{serverPort}";
 	}
 
 
@@ -119,11 +125,10 @@ public class SignalClient : MonoBehaviour {
 
             string responseData = System.Text.Encoding.UTF8.GetString(data, 0, bytes);
 
-            //Recieve Data Will Be   245,135,90[/TCP]   , str 不會包含[/TCP]
             if(string.IsNullOrEmpty(token[0])){
-                    ActionQueue += delegate {
-                        OnSignalReceived.Invoke(responseData);
-                    };
+                ActionQueue += delegate {
+                    OnSignalReceived.Invoke(responseData);
+                };
             } else {
                 string[] substrings = responseData.Split (token, StringSplitOptions.None);  // => 245,135,90
 
@@ -152,31 +157,31 @@ public class SignalClient : MonoBehaviour {
             byte[] sendData = System.Text.Encoding.UTF8.GetBytes(toSend);
             netStream.Write(sendData, 0, sendData.Length);
 
-            //Debug.Log ($"TCP >> Send: {sendStr}");
-            Debug.Log($"Tcp Send : {sendStr.Length}");
+            Debug.Log ($"TCP >> Send: {sendStr}");
         }
         catch(System.Exception e){
             Debug.LogError(e.Message.ToString());
         }
 	}
 
-    public void SocketSend(byte[] sendByte)
-	{
+    public void SocketSend(byte[] sendbyte)
+    {
         if(tcpSocket == null)
             return;
-
+            
         if(!netStream.CanWrite)
             return;
 
         try {
-            netStream.Write(sendByte, 0, sendByte.Length);
-
-            Debug.Log ($"TCP >> Send: byte");
-        }
-        catch(System.Exception e){
+            netStream.Write(sendbyte, 0, sendbyte.Length);
+            if(!string.IsNullOrEmpty(EndToken)){
+                byte[] end = System.Text.Encoding.UTF8.GetBytes(EndToken);
+                netStream.Write(end, 0, end.Length);
+            }
+        } catch(System.Exception e){
             Debug.LogError(e.Message.ToString());
         }
-	}
+    }
 
 	public void CloseSocket()
 	{
@@ -189,7 +194,7 @@ public class SignalClient : MonoBehaviour {
         netStream?.Close();
 		tcpSocket?.Close();
 
-        print("diconnect.");
+        Debug.Log("<color=red>Client Diconnect.</color>");
 	}
 
     public async void RestartSocket(){
