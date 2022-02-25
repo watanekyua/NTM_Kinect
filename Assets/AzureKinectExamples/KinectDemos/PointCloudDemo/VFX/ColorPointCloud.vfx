@@ -1036,7 +1036,7 @@ MonoBehaviour:
   m_Children: []
   m_UIPosition: {x: -127, y: 296}
   m_UICollapsed: 0
-  m_UISuperCollapsed: 1
+  m_UISuperCollapsed: 0
   m_InputSlots: []
   m_OutputSlots:
   - {fileID: 8926484042661615093}
@@ -1061,7 +1061,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615094}
   - {fileID: 8926484042661615095}
   m_UIPosition: {x: 0, y: 0}
-  m_UICollapsed: 1
+  m_UICollapsed: 0
   m_UISuperCollapsed: 0
   m_MasterSlot: {fileID: 8926484042661615093}
   m_MasterData:
@@ -1079,7 +1079,6 @@ MonoBehaviour:
         Culture=neutral, PublicKeyToken=null
   m_Direction: 1
   m_LinkedSlots:
-  - {fileID: 8926484042661615134}
   - {fileID: 8926484042661615143}
 --- !u!114 &8926484042661615094
 MonoBehaviour:
@@ -1196,7 +1195,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEngine.Texture2D, UnityEngine.CoreModule, Version=0.0.0.0,
           Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"obj":{"fileID":8400000,"guid":"47c5e6c477ed87145a6271ee350fca34","type":2}}'
+      m_SerializableObject: '{"obj":{"fileID":8400000,"guid":"64882ab9c2d551344a5fdd99f3dddefe","type":2}}'
     m_Space: 2147483647
   m_Property:
     name: texture
@@ -2088,8 +2087,7 @@ MonoBehaviour:
       m_SerializableType: UnityEngine.Vector2, UnityEngine.CoreModule, Version=0.0.0.0,
         Culture=neutral, PublicKeyToken=null
   m_Direction: 0
-  m_LinkedSlots:
-  - {fileID: 8926484042661615093}
+  m_LinkedSlots: []
 --- !u!114 &8926484042661615135
 MonoBehaviour:
   m_ObjectHideFlags: 0
