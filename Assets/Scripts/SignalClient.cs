@@ -9,6 +9,7 @@ using UnityEngine.Events;
 using System.Threading.Tasks;
 
 public class SignalClient : MonoBehaviour {
+    public TMPro.TextMeshProUGUI TXT_Logger; 
     public string serverIP = "127.0.0.1";
     public int serverPort = 25568;
     public int recvBufferSize = 1024;
@@ -80,6 +81,8 @@ public class SignalClient : MonoBehaviour {
         connectThread.Start ();
 
         Debug.Log ($"Connect to Server ({serverIP}) at port :" + serverPort);
+        if(TXT_Logger)
+            TXT_Logger.text = $"Connect to Server ({serverIP}) at port :" + serverPort;
 	}
 
 

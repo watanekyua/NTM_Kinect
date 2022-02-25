@@ -12,6 +12,8 @@ public class AngleParse : MonoBehaviour
     }
 
     void RecvData(string data){
+        DeviceLogger.instance.SetText_RecieveArduinoAngle(data);
         arduinoSender.SocketSend(data);
+        DeviceLogger.instance.SetText_ToSendAngle(data);
     }
 }
