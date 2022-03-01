@@ -19,8 +19,8 @@ public class PosReciever : MonoBehaviour
             float.TryParse(tok[1], out y);
 
             if(isReadyToSend){
-                LogicManager.instance.SendSerial(new Vector2(x, y));
-                DeviceLogger.instance.SetText_RecieveMinPos(new Vector2(x, y).ToString());
+                LogicManager.instance.SendSerial(new Vector2(x, -y));
+                DeviceLogger.instance.SetText_RecieveMinPos(new Vector2(x, -y).ToString());
             }
                 
         } catch {}

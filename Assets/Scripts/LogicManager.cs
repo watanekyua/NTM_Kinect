@@ -7,12 +7,24 @@ public class LogicManager : HimeLib.SingletonMono<LogicManager>
 {
     public ArduinoInteractive arduino;
     public InputField INP_angleDelta;
+    public InputField INP_Com;
+    public Button BTN_Open;
+    public Button BTN_Close;
     public float angleDelta = 60f;
 
     [Header("Arduino")]
     public bool ReadyToSend = false;
     void Start()
     {
+        StartCoroutine(BeLateStart());
+
+        BTN_Open.onClick.AddListener(() => {
+            arduino.StartSerial();
+        });
+
+        BTN_Close.onClick.AddListener(() => {
+            arduino.CloseArduino();
+        });
 
         INP_angleDelta.onValueChanged.AddListener(x => {
             float result = 0;
@@ -23,6 +35,18 @@ public class LogicManager : HimeLib.SingletonMono<LogicManager>
         });
 
         INP_angleDelta.text = SystemConfig.Instance.GetData<float>("angleDelta", 0).ToString();
+
+        INP_Com.onValueChanged.AddListener(x => {
+            arduino.comName = INP_Com.text;
+            SystemConfig.Instance.SaveData("COM", arduino.comName);
+        });
+
+        INP_Com.text = SystemConfig.Instance.GetData<string>("COM", "COM3");
+    }
+
+    IEnumerator BeLateStart(){
+        yield return new WaitForSeconds(5);
+        arduino.StartSerial();
     }
 
     // void ParseData(string data){
