@@ -10,6 +10,10 @@ public class ApplicationDelegate : HimeLib.SingletonMono<ApplicationDelegate>
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
+    public void QuitAPP(){
+        Application.Quit();
+    }
+
     private void OnApplicationQuit() {
         ToDoOnQuit?.Invoke();
         SystemConfig.Instance.SaveValues();
