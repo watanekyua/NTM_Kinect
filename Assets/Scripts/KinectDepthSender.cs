@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using com.rfilkov.kinect;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
 public class KinectDepthSender : MonoBehaviour
 {
     public SignalClient client;
+    public NetworkManager networkManager;
     public RenderTexture output;
     public float SendRate = 0.5f;
     public int sensorIndex = 0;
@@ -19,6 +21,9 @@ public class KinectDepthSender : MonoBehaviour
 
     bool toSaveImage = false;
     int saveIndex = 0;
+
+    byte[] buffByte;
+    int sendCount = 0;
 
     IEnumerator Start()
     {
@@ -33,6 +38,9 @@ public class KinectDepthSender : MonoBehaviour
         INP_DepthSendTime.text = SystemConfig.Instance.GetData<float>("DepthRate", 0.5f).ToString();
 
         yield return new WaitForSeconds(3);
+        
+        LoopUploadImage();
+        LoopSend();
 
         while (true)
         {
@@ -41,8 +49,41 @@ public class KinectDepthSender : MonoBehaviour
         }
     }
 
-    void SetDepthSendTime(){
+    async void LoopUploadImage(){
+        while(this != null){
+            PostDepth();
 
+            int sendTime = Mathf.Max(200, Mathf.FloorToInt(SendRate * 1000 * 1.5f));
+            await Task.Delay(sendTime);
+        }
+    }
+
+    void PostDepth(){
+        //string url = networkManager.serverURL + networkManager.api_upload_depth;
+        //Debug.Log($"post to {url}");
+
+        if(buffByte != null)
+            networkManager.API_Depth_UploadFile(buffByte, "depthImage.jpg");
+    }
+
+    async void LoopSend(){
+        while(this != null){
+            await Task.Run(delegate {
+                try
+                {
+                    client.SocketSend(buffByte);
+                    sendCount++;
+                    //Debug.Log($"total byte {buffByte.Length} send. (" + (float)buffByte.Length / 1024f + "KB)");
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("Depth Socket error: " + e);
+                }
+            });
+
+            int sendTime = Mathf.FloorToInt(SendRate * 1000);
+            await Task.Delay(sendTime);
+        }
     }
 
     void ParseDataToSend()
@@ -51,21 +92,18 @@ public class KinectDepthSender : MonoBehaviour
             return;
 
         var tex = TextureToTexture2D(buffTex);
-        byte[] bytes = tex.EncodeToJPG(100);
+        buffByte = tex.EncodeToJPG(100);
+
         queueTex.Enqueue(tex);
         if(queueTex.Count > maxTexQueueCount){
             var deTex = queueTex.Dequeue();
             Destroy(deTex);
         }
 
-        client.SocketSend(bytes);
-
-        Debug.Log($"total byte {bytes.Length} send. (" + (float)bytes.Length / 1024f + "KB)");
-        DeviceLogger.instance.SetText_ToSendImageByte(($"total byte {bytes.Length} send. (" + (float)bytes.Length / 1024f + "KB)"));
-
         try {
             if(toSaveImage){
-                WriteFile(bytes);
+                WriteFile(buffByte);
+                //PostDepth();
                 toSaveImage = false;
             }
         } catch {}
@@ -79,6 +117,9 @@ public class KinectDepthSender : MonoBehaviour
             buffTex = kinectManager.GetDepthImageTex(sensorIndex);
             Graphics.Blit(buffTex, output);
         }
+
+        if(buffByte != null)
+            DeviceLogger.instance.SetText_ToSendImageByte($"total byte {buffByte.Length} send. (" + (float)buffByte.Length / 1024f + "KB)" + $" (id:{sendCount})");
 
         if(Input.GetKeyDown(KeyCode.F12)){
             toSaveImage = true;
@@ -105,6 +146,7 @@ public class KinectDepthSender : MonoBehaviour
     void WriteFile(byte[] data){
         var path = Application.dataPath + $"/../output_{saveIndex}.jpg";
         System.IO.File.WriteAllBytes(path, data);
+        //networkManager.API_Depth_UploadFile(path, "depthImage.jpg");
         saveIndex++;
     }
 }

@@ -30,7 +30,7 @@ public class DeviceLogger : HimeLib.SingletonMono<DeviceLogger>
             TXT_RecieveArduinoAngle.text = msg;
     }
 
-    public void SetText_ToSendAngle(string msg){
+    public void SetText_PostAngleResult(string msg){
         if(TXT_ToSendAngle)
             TXT_ToSendAngle.text = msg;
     }

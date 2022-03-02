@@ -22,6 +22,7 @@ public class SignalClient : MonoBehaviour {
 
     [Header("Auto Work")]
     public bool runInStart = false;
+    public bool StopSendData = false;
 
 
 
@@ -146,6 +147,9 @@ public class SignalClient : MonoBehaviour {
 
 	public void SocketSend(string sendStr)
 	{
+        if(StopSendData)
+            return;
+
         if(tcpSocket == null)
             return;
 
@@ -157,7 +161,7 @@ public class SignalClient : MonoBehaviour {
             byte[] sendData = System.Text.Encoding.UTF8.GetBytes(toSend);
             netStream.Write(sendData, 0, sendData.Length);
 
-            Debug.Log ($"TCP >> Send: {sendStr}");
+            //Debug.Log ($"TCP >> Send: {sendStr}");
         }
         catch(System.Exception e){
             Debug.LogError(e.Message.ToString());
@@ -166,20 +170,29 @@ public class SignalClient : MonoBehaviour {
 
     public void SocketSend(byte[] sendbyte)
     {
+        if(StopSendData)
+            return;
+
         if(tcpSocket == null)
             return;
             
         if(!netStream.CanWrite)
             return;
 
+        int step = 0;
+
         try {
+            step = 0;
             netStream.Write(sendbyte, 0, sendbyte.Length);
+            step = 1;
             if(!string.IsNullOrEmpty(EndToken)){
+                step = 2;
                 byte[] end = System.Text.Encoding.UTF8.GetBytes(EndToken);
+                step = 3;
                 netStream.Write(end, 0, end.Length);
             }
         } catch(System.Exception e){
-            Debug.LogError(e.Message.ToString());
+            Debug.LogError(e.Message.ToString() + $" step:{step}");
         }
     }
 

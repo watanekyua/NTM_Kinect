@@ -103,7 +103,7 @@ public class LogicManager : HimeLib.SingletonMono<LogicManager>
         byte[] tosend = {0x00, 0x06, 0x01, convAngle, 0x0d, 0x0a};
         arduino.SendByte(tosend);
 
-        Debug.Log($"{0x00} {0x06} {0x01} {convAngle} {0x0d} {0x0a} / angle:{angle}");
+        //Debug.Log($"{0x00} {0x06} {0x01} {convAngle} {0x0d} {0x0a} / angle:{angle}");
         DeviceLogger.instance.SetText_ToSendToArduino($"{0x00} {0x06} {0x01} {convAngle} {0x0d} {0x0a} / angle:{angle}");
     }
 }
